@@ -1,7 +1,10 @@
-let characteristic;
+document.addEventListener("DOMContentLoaded", function () {
+
+let characteristic = null;
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 
+// CONNECT
 document.getElementById("connectBtn").addEventListener("click", async function () {
 
   if (!navigator.bluetooth) {
@@ -30,22 +33,17 @@ document.getElementById("connectBtn").addEventListener("click", async function (
   }
 });
 
+// HANDLE DATA
 function handleData(event) {
   const value = decoder.decode(event.target.value);
   const parts = value.split(",");
 
-  const angle = parseFloat(parts[0]);
-  const slouchCount = parseInt(parts[1]);
-  const slouchTime = parseInt(parts[2]);
-  const status = parts[3];
-  const score = parseInt(parts[4]);
+  document.getElementById("angle").innerText = parseFloat(parts[0]).toFixed(2) + "°";
+  document.getElementById("slouchCount").innerText = parts[1];
+  document.getElementById("slouchTime").innerText = formatTime(parseInt(parts[2]));
+  document.getElementById("score").innerText = parts[4];
 
-  document.getElementById("angle").innerText = angle.toFixed(2) + "°";
-  document.getElementById("slouchCount").innerText = slouchCount;
-  document.getElementById("slouchTime").innerText = formatTime(slouchTime);
-  document.getElementById("score").innerText = score;
-
-  updateUI(status);
+  updateUI(parts[3]);
 }
 
 function formatTime(seconds) {
@@ -66,19 +64,23 @@ function updateUI(status) {
   }
 }
 
-// ===== RESET BUTTON =====
+// RESET
 document.getElementById("resetBtn").addEventListener("click", async function () {
-  if (!characteristic) return;
-
+  if (!characteristic) {
+    alert("Device not connected.");
+    return;
+  }
   await characteristic.writeValue(encoder.encode("RESET"));
 });
 
-// Sensitivity Slider (UI only)
+// SLIDER
 document.getElementById("slider").addEventListener("input", function () {
   document.getElementById("sliderValue").innerText = this.value;
 });
+
+// SERVICE WORKER
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js')
-    .then(() => console.log("Service Worker Registered"));
+  navigator.serviceWorker.register('./service-worker.js');
 }
 
+});
