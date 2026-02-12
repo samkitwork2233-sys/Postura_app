@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="manifest" href="manifest.json">
+
+  <meta charset="UTF-8">
+  <title>POSTURA – Smart Posture Monitor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+  <h1>POSTURA</h1>
+  <p id="status">Disconnected</p>
+
+  <button id="connectBtn">Connect Device</button>
+
+  <div class="cards">
+    <div class="card">
+      <h3>Current Angle</h3>
+      <p id="angle">0°</p>
+    </div>
+
+    <div class="card">
+      <h3>Slouch Count</h3>
+      <p id="slouchCount">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Total Slouch Time</h3>
+      <p id="slouchTime">00:00</p>
+    </div>
+  </div>
+
+  <div class="scoreContainer">
+    <div class="circle">
+      <span id="score">100</span>
+    </div>
+    <p id="postureText">Excellent Posture</p>
+  </div>
+
+  <button id="resetBtn">Reset Data</button>
+
+  <div class="sliderContainer">
+    <label>Sensitivity: <span id="sliderValue">10</span>°</label>
+    <input type="range" id="slider" min="5" max="25" value="10">
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
