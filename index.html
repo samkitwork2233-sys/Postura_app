@@ -1,12 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <link rel="manifest" href="manifest.json">
-
   <meta charset="UTF-8">
   <title>POSTURA – Smart Posture Monitor</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1e3c72">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <div class="container">
@@ -17,6 +24,7 @@
   <button id="connectBtn">Connect Device</button>
 
   <div class="cards">
+
     <div class="card">
       <h3>Current Angle</h3>
       <p id="angle">0°</p>
@@ -31,6 +39,7 @@
       <h3>Total Slouch Time</h3>
       <p id="slouchTime">00:00</p>
     </div>
+
   </div>
 
   <div class="scoreContainer">
@@ -43,12 +52,18 @@
   <button id="resetBtn">Reset Data</button>
 
   <div class="sliderContainer">
-    <label>Sensitivity: <span id="sliderValue">10</span>°</label>
+    <label>
+      Sensitivity: <span id="sliderValue">10</span>°
+    </label>
+    <br>
     <input type="range" id="slider" min="5" max="25" value="10">
   </div>
 
 </div>
 
+<!-- Script must be last -->
 <script src="script.js"></script>
+
 </body>
 </html>
+
