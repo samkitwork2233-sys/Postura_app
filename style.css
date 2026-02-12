@@ -6,7 +6,6 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  color: #333;
 }
 
 .container {
@@ -94,3 +93,5 @@ button:hover {
 input[type="range"] {
   width: 80%;
 }
+
+
