@@ -73,9 +73,16 @@ document.getElementById("resetBtn").addEventListener("click", async function () 
   await characteristic.writeValue(encoder.encode("RESET"));
 });
 
-// SLIDER
-document.getElementById("slider").addEventListener("input", function () {
-  document.getElementById("sliderValue").innerText = this.value;
+// SLIDER (REAL CONTROL)
+document.getElementById("slider").addEventListener("input", async function () {
+  const value = this.value;
+  document.getElementById("sliderValue").innerText = value;
+
+  if (characteristic) {
+    await characteristic.writeValue(
+      encoder.encode("TH:" + value)
+    );
+  }
 });
 
 // SERVICE WORKER
