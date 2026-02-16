@@ -1,143 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>POSTURA Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>POSTURA – Smart Posture Monitor</title>
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1e3c72">
 
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #4e73df, #1cc88a);
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-        }
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.json">
 
-        h1 {
-            color: white;
-            font-size: 34px;
-            margin-bottom: 10px;
-        }
-
-        .card {
-            background: white;
-            margin: 20px auto;
-            padding: 25px;
-            width: 95%;
-            max-width: 550px;
-            border-radius: 18px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            animation: fadeIn 0.6s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .big-text { font-size: 20px; font-weight: 600; }
-        .value-text { font-size: 28px; font-weight: bold; }
-
-        button {
-            padding: 12px 26px;
-            margin: 10px;
-            border: none;
-            border-radius: 10px;
-            background: #4e73df;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        button:active { transform: scale(0.95); }
-
-        .disconnect-btn { background: #e74a3b; }
-
-        .history-item {
-            margin-bottom: 12px;
-            padding: 12px;
-            border-radius: 10px;
-            background: #f8f9fc;
-            border-left: 5px solid #4e73df;
-            text-align: left;
-        }
-
-        .slider {
-            width: 85%;
-            height: 8px;
-            border-radius: 5px;
-            background: #d1d3e2;
-            appearance: none;
-            margin-top: 15px;
-        }
-
-        .slider::-webkit-slider-thumb {
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #4e73df;
-            cursor: pointer;
-        }
-    </style>
+  <!-- CSS -->
+  <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
 
-<h1>POSTURA</h1>
+<div class="container">
 
-<div class="card">
-    <p class="big-text">Status: <span id="status">Disconnected</span></p>
-    <p class="big-text">Device: <span id="deviceName">-</span></p>
-    <button onclick="connectBLE()">Connect</button>
-    <button class="disconnect-btn" onclick="disconnectBLE()">Disconnect</button>
+  <h1>POSTURA</h1>
+  <p id="status">Disconnected</p>
+
+  <button id="connectBtn">Connect Device</button>
+
+  <div class="cards">
+
+    <div class="card">
+      <h3>Current Angle</h3>
+      <p id="angle">0°</p>
+    </div>
+
+    <div class="card">
+      <h3>Slouch Count</h3>
+      <p id="slouchCount">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Total Slouch Time</h3>
+      <p id="slouchTime">00:00</p>
+    </div>
+
+  </div>
+
+  <div class="scoreContainer">
+    <div class="circle">
+      <span id="score">100</span>
+    </div>
+    <p id="postureText">Excellent Posture</p>
+  </div>
+
+  <button id="resetBtn">Reset Data</button>
+
+  <div class="sliderContainer">
+    <label>
+      Sensitivity: <span id="sliderValue">10</span>°
+    </label>
+    <br>
+    <input type="range" id="slider" min="5" max="25" value="10">
+  </div>
+
 </div>
 
-<div class="card">
-    <p class="big-text">Current Angle</p>
-    <p class="value-text"><span id="angle">0</span>°</p>
-
-    <p class="big-text">Slouch Count</p>
-    <p class="value-text"><span id="slouchCount">0</span></p>
-
-    <p class="big-text">Total Slouch Time</p>
-    <p class="value-text"><span id="slouchTime">0</span> sec</p>
-
-    <p class="big-text">Session Duration</p>
-    <p class="value-text"><span id="sessionDuration">0</span> sec</p>
-
-    <p class="big-text">Posture Score</p>
-    <p class="value-text"><span id="postureScore">100</span>%</p>
-
-    <button onclick="resetSession()">Reset Data</button>
-</div>
-
-<div class="card">
-    <h2>Sensitivity Control</h2>
-    <p>Sensitivity: <span id="sensitivityValue">10</span>°</p>
-    <input type="range" min="5" max="30" value="10"
-        id="sensitivitySlider"
-        class="slider"
-        oninput="updateSensitivity(this.value)">
-</div>
-
-<div class="card">
-    <h2>Session History</h2>
-    <div id="historyContainer"></div>
-    <button onclick="clearHistory()">Clear History</button>
-</div>
-
-<div class="card">
-    <h2>Posture Score Trend</h2>
-    <canvas id="postureChart"></canvas>
-</div>
-
-<script src="script.js"></script>
-
+<script src="./script.js"></script>
 </body>
 </html>
+
 
