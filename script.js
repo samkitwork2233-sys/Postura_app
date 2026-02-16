@@ -33,6 +33,11 @@ async function connectBLE() {
     characteristic.addEventListener("characteristicvaluechanged", handleData);
 
     document.getElementById("status").innerText = "Connected";
+
+    // Reset values at start of session
+    slouchCount = 0;
+    totalSlouchTime = 0;
+    score = 100;
     sessionStartTime = Date.now();
 
   } catch (error) {
@@ -54,10 +59,11 @@ function handleData(event) {
   const parts = value.split(",");
 
   if (parts.length >= 5) {
+
     const angle = parseFloat(parts[0]);
-    slouchCount = parseInt(parts[1]) || 0;
-    totalSlouchTime = parseInt(parts[2]) || 0;
-    score = parseInt(parts[4]) || 100;
+    slouchCount = Number(parts[1]) || 0;
+    totalSlouchTime = Number(parts[2]) || 0;
+    score = Number(parts[4]) || 100;
 
     document.getElementById("angle").innerText = angle.toFixed(1) + "°";
     document.getElementById("slouchCount").innerText = slouchCount;
@@ -98,7 +104,7 @@ function handleSlider(event) {
   }
 }
 
-// SAVE SESSION (SAFE VERSION)
+// SAVE SESSION (STRICT SAFE VERSION)
 function saveSession() {
   if (!sessionStartTime) return;
 
@@ -106,10 +112,10 @@ function saveSession() {
 
   const sessionData = {
     date: new Date().toLocaleString(),
-    slouches: slouchCount || 0,
-    slouchTime: totalSlouchTime || 0,
-    score: score || 100,
-    duration: sessionDuration
+    slouches: Number(slouchCount) || 0,
+    slouchTime: Number(totalSlouchTime) || 0,
+    score: Number(score) || 100,
+    duration: Number(sessionDuration) || 0
   };
 
   let history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
@@ -126,13 +132,19 @@ function loadHistory() {
   container.innerHTML = "";
 
   history.slice().reverse().forEach(item => {
+
+    const sl = Number(item.slouches) || 0;
+    const st = Number(item.slouchTime) || 0;
+    const sc = Number(item.score) || 100;
+    const du = Number(item.duration) || 0;
+
     container.innerHTML += `
       <div class="historyItem">
         <b>${item.date}</b><br>
-        Slouches: ${item.slouches}<br>
-        Slouch Time: ${formatTime(item.slouchTime)}<br>
-        Score: ${item.score}%<br>
-        Duration: ${formatTime(item.duration)}
+        Slouches: ${sl}<br>
+        Slouch Time: ${formatTime(st)}<br>
+        Score: ${sc}%<br>
+        Duration: ${formatTime(du)}
       </div>
     `;
   });
