@@ -20,7 +20,6 @@
             color: white;
             font-size: 34px;
             margin-bottom: 10px;
-            letter-spacing: 2px;
         }
 
         .card {
@@ -31,17 +30,16 @@
             max-width: 550px;
             border-radius: 18px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            animation: fadeIn 0.6s ease-in-out;
         }
 
-        .big-text {
-            font-size: 20px;
-            font-weight: 600;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .value-text {
-            font-size: 28px;
-            font-weight: bold;
-        }
+        .big-text { font-size: 20px; font-weight: 600; }
+        .value-text { font-size: 28px; font-weight: bold; }
 
         button {
             padding: 12px 26px;
@@ -52,20 +50,12 @@
             color: white;
             font-size: 16px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
         }
 
-        button:hover {
-            background: #2e59d9;
-        }
+        button:active { transform: scale(0.95); }
 
-        .disconnect-btn {
-            background: #e74a3b;
-        }
-
-        .disconnect-btn:hover {
-            background: #c0392b;
-        }
+        .disconnect-btn { background: #e74a3b; }
 
         .history-item {
             margin-bottom: 12px;
@@ -74,16 +64,13 @@
             background: #f8f9fc;
             border-left: 5px solid #4e73df;
             text-align: left;
-            font-size: 15px;
         }
 
-        /* Slider Style */
         .slider {
             width: 85%;
             height: 8px;
             border-radius: 5px;
             background: #d1d3e2;
-            outline: none;
             appearance: none;
             margin-top: 15px;
         }
@@ -95,15 +82,6 @@
             border-radius: 50%;
             background: #4e73df;
             cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .slider::-webkit-slider-thumb:hover {
-            background: #2e59d9;
-        }
-
-        canvas {
-            margin-top: 15px;
         }
     </style>
 </head>
@@ -134,13 +112,13 @@
 
     <p class="big-text">Posture Score</p>
     <p class="value-text"><span id="postureScore">100</span>%</p>
+
+    <button onclick="resetSession()">Reset Data</button>
 </div>
 
 <div class="card">
     <h2>Sensitivity Control</h2>
-    <p style="font-size:18px;">
-        Sensitivity: <span id="sensitivityValue">10</span>°
-    </p>
+    <p>Sensitivity: <span id="sensitivityValue">10</span>°</p>
     <input type="range" min="5" max="30" value="10"
         id="sensitivitySlider"
         class="slider"
@@ -162,3 +140,4 @@
 
 </body>
 </html>
+
