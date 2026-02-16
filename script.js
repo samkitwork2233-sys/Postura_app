@@ -49,15 +49,10 @@ function disconnectBLE() {
 
 // ================= HANDLE DATA =================
 function handleData(event) {
-
     const value = new TextDecoder().decode(event.target.value);
     const parts = value.split(",");
 
-    // Format from ESP32:
-    // angle,slouchCount,totalSlouchTime,status,score
-
     if (parts.length >= 5) {
-
         const angle = parseFloat(parts[0]);
         slouchCount = parseInt(parts[1]);
         totalSlouchTime = parseInt(parts[2]);
@@ -93,28 +88,24 @@ function endSession() {
 
 // ================= DATA LOGGING =================
 function saveSessionData() {
-
     const today = new Date().toLocaleDateString();
 
     const sessionData = {
         date: today,
-        slouchCount: slouchCount,
+        slouchCount,
         slouchTime: totalSlouchTime,
-        postureScore: postureScore,
+        postureScore,
         duration: sessionDuration
     };
 
     let history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
     history.push(sessionData);
-
     localStorage.setItem("posturaHistory", JSON.stringify(history));
 }
 
 function loadHistory() {
-
     const history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
     const container = document.getElementById("historyContainer");
-
     container.innerHTML = "";
 
     history.forEach(record => {
@@ -132,9 +123,7 @@ function loadHistory() {
 
 // ================= CHART =================
 function updateChart() {
-
     const history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
-
     const labels = history.map(item => item.date);
     const scores = history.map(item => item.postureScore);
 
@@ -145,23 +134,30 @@ function updateChart() {
     chart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
+            labels,
             datasets: [{
                 label: 'Posture Score (%)',
                 data: scores,
-                borderWidth: 2,
+                borderWidth: 3,
                 tension: 0.3
             }]
         },
         options: {
             scales: {
-                y: {
-                    min: 0,
-                    max: 100
-                }
+                y: { min: 0, max: 100 }
             }
         }
     });
+}
+
+// ================= SENSITIVITY =================
+function updateSensitivity(value) {
+    document.getElementById("sensitivityValue").innerText = value;
+
+    if (characteristic) {
+        const command = "TH:" + value;
+        characteristic.writeValue(new TextEncoder().encode(command));
+    }
 }
 
 function clearHistory() {
