@@ -1,67 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>POSTURA – Smart Posture Monitor</title>
+    <title>POSTURA Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#1e3c72">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- PWA -->
-  <link rel="manifest" href="./manifest.json">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            text-align: center;
+        }
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="./style.css">
+        h2 {
+            margin-top: 20px;
+        }
+
+        .card {
+            background: white;
+            margin: 15px auto;
+            padding: 20px;
+            width: 95%;
+            max-width: 500px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 8px;
+            border: none;
+            border-radius: 8px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #historyContainer {
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .history-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #fafafa;
+            border: 1px solid #ddd;
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="container">
+<h2>POSTURA Dashboard</h2>
 
-  <h1>POSTURA</h1>
-  <p id="status">Disconnected</p>
-
-  <button id="connectBtn">Connect Device</button>
-
-  <div class="cards">
-
-    <div class="card">
-      <h3>Current Angle</h3>
-      <p id="angle">0°</p>
-    </div>
-
-    <div class="card">
-      <h3>Slouch Count</h3>
-      <p id="slouchCount">0</p>
-    </div>
-
-    <div class="card">
-      <h3>Total Slouch Time</h3>
-      <p id="slouchTime">00:00</p>
-    </div>
-
-  </div>
-
-  <div class="scoreContainer">
-    <div class="circle">
-      <span id="score">100</span>
-    </div>
-    <p id="postureText">Excellent Posture</p>
-  </div>
-
-  <button id="resetBtn">Reset Data</button>
-
-  <div class="sliderContainer">
-    <label>
-      Sensitivity: <span id="sliderValue">10</span>°
-    </label>
-    <br>
-    <input type="range" id="slider" min="5" max="25" value="10">
-  </div>
-
+<div class="card">
+    <p><b>Status:</b> <span id="status">Disconnected</span></p>
+    <button onclick="connectBLE()">Connect</button>
+    <button onclick="disconnectBLE()">Disconnect</button>
 </div>
 
-<script src="./script.js"></script>
+<div class="card">
+    <p>Current Angle: <span id="angle">0</span>°</p>
+    <p>Slouch Count: <span id="slouchCount">0</span></p>
+    <p>Total Slouch Time: <span id="slouchTime">0</span> sec</p>
+    <p>Session Duration: <span id="sessionDuration">0</span> sec</p>
+    <p>Posture Score: <span id="postureScore">100</span>%</p>
+</div>
+
+<div class="card">
+    <h3>Session History</h3>
+    <div id="historyContainer"></div>
+    <button onclick="clearHistory()">Clear History</button>
+</div>
+
+<div class="card">
+    <h3>Posture Score Trend</h3>
+    <canvas id="postureChart"></canvas>
+</div>
+
+<script src="script.js"></script>
+
 </body>
 </html>
+
 
