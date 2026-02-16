@@ -11,13 +11,12 @@ let sessionInterval;
 
 let chart;
 
-// ================= CONNECT =================
+// ===== CONNECT (MAX COMPATIBILITY) =====
 async function connectBLE() {
     try {
         device = await navigator.bluetooth.requestDevice({
-            filters: [
-                { services: ['12345678-1234-1234-1234-1234567890ab'] }
-            ]
+            acceptAllDevices: true,
+            optionalServices: ['12345678-1234-1234-1234-1234567890ab']
         });
 
         const server = await device.gatt.connect();
@@ -28,16 +27,17 @@ async function connectBLE() {
         characteristic.addEventListener('characteristicvaluechanged', handleData);
 
         document.getElementById("status").innerText = "Connected";
-        document.getElementById("deviceName").innerText = device.name || "POSTURA";
+        document.getElementById("deviceName").innerText = device.name || "POSTURA_V3";
 
         startSession();
 
     } catch (error) {
-        alert("Connection Failed");
+        console.error(error);
+        alert("Bluetooth connection failed");
     }
 }
 
-// ================= DISCONNECT =================
+// ===== DISCONNECT =====
 function disconnectBLE() {
     if (device && device.gatt.connected) {
         device.gatt.disconnect();
@@ -47,7 +47,7 @@ function disconnectBLE() {
     }
 }
 
-// ================= HANDLE DATA =================
+// ===== HANDLE DATA =====
 function handleData(event) {
     const value = new TextDecoder().decode(event.target.value);
     const parts = value.split(",");
@@ -69,7 +69,7 @@ function handleData(event) {
     }
 }
 
-// ================= SESSION =================
+// ===== SESSION TIMER =====
 function startSession() {
     sessionStartTime = Date.now();
     sessionInterval = setInterval(() => {
@@ -86,7 +86,40 @@ function endSession() {
     updateChart();
 }
 
-// ================= DATA LOGGING =================
+// ===== RESET =====
+function resetSession() {
+
+    slouchCount = 0;
+    totalSlouchTime = 0;
+    postureScore = 100;
+    sessionDuration = 0;
+
+    document.getElementById("slouchCount").innerText = 0;
+    document.getElementById("slouchTime").innerText = 0;
+    document.getElementById("postureScore").innerText = 100;
+    document.getElementById("sessionDuration").innerText = 0;
+
+    if (characteristic) {
+        const command = "RESET";
+        characteristic.writeValueWithoutResponse(
+            new TextEncoder().encode(command)
+        );
+    }
+}
+
+// ===== SENSITIVITY =====
+function updateSensitivity(value) {
+    document.getElementById("sensitivityValue").innerText = value;
+
+    if (characteristic) {
+        const command = "TH:" + value;
+        characteristic.writeValueWithoutResponse(
+            new TextEncoder().encode(command)
+        );
+    }
+}
+
+// ===== DATA LOGGING =====
 function saveSessionData() {
     const today = new Date().toLocaleDateString();
 
@@ -121,7 +154,7 @@ function loadHistory() {
     });
 }
 
-// ================= CHART =================
+// ===== GRAPH =====
 function updateChart() {
     const history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
     const labels = history.map(item => item.date);
@@ -143,21 +176,9 @@ function updateChart() {
             }]
         },
         options: {
-            scales: {
-                y: { min: 0, max: 100 }
-            }
+            scales: { y: { min: 0, max: 100 } }
         }
     });
-}
-
-// ================= SENSITIVITY =================
-function updateSensitivity(value) {
-    document.getElementById("sensitivityValue").innerText = value;
-
-    if (characteristic) {
-        const command = "TH:" + value;
-        characteristic.writeValue(new TextEncoder().encode(command));
-    }
 }
 
 function clearHistory() {
