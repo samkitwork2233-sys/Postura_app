@@ -14,13 +14,13 @@
             margin: 0;
             padding: 20px;
             text-align: center;
-            color: #333;
         }
 
         h1 {
             color: white;
-            font-size: 32px;
+            font-size: 34px;
             margin-bottom: 10px;
+            letter-spacing: 2px;
         }
 
         .card {
@@ -29,22 +29,22 @@
             padding: 25px;
             width: 95%;
             max-width: 550px;
-            border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
 
         .big-text {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 600;
         }
 
         .value-text {
-            font-size: 26px;
+            font-size: 28px;
             font-weight: bold;
         }
 
         button {
-            padding: 12px 24px;
+            padding: 12px 26px;
             margin: 10px;
             border: none;
             border-radius: 10px;
@@ -77,8 +77,33 @@
             font-size: 15px;
         }
 
+        /* Slider Style */
+        .slider {
+            width: 85%;
+            height: 8px;
+            border-radius: 5px;
+            background: #d1d3e2;
+            outline: none;
+            appearance: none;
+            margin-top: 15px;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4e73df;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            background: #2e59d9;
+        }
+
         canvas {
-            margin-top: 10px;
+            margin-top: 15px;
         }
     </style>
 </head>
@@ -109,6 +134,17 @@
 
     <p class="big-text">Posture Score</p>
     <p class="value-text"><span id="postureScore">100</span>%</p>
+</div>
+
+<div class="card">
+    <h2>Sensitivity Control</h2>
+    <p style="font-size:18px;">
+        Sensitivity: <span id="sensitivityValue">10</span>°
+    </p>
+    <input type="range" min="5" max="30" value="10"
+        id="sensitivitySlider"
+        class="slider"
+        oninput="updateSensitivity(this.value)">
 </div>
 
 <div class="card">
