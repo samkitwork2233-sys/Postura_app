@@ -55,9 +55,9 @@ function handleData(event) {
 
   if (parts.length >= 5) {
     const angle = parseFloat(parts[0]);
-    slouchCount = parseInt(parts[1]);
-    totalSlouchTime = parseInt(parts[2]);
-    score = parseInt(parts[4]);
+    slouchCount = parseInt(parts[1]) || 0;
+    totalSlouchTime = parseInt(parts[2]) || 0;
+    score = parseInt(parts[4]) || 100;
 
     document.getElementById("angle").innerText = angle.toFixed(1) + "°";
     document.getElementById("slouchCount").innerText = slouchCount;
@@ -98,7 +98,7 @@ function handleSlider(event) {
   }
 }
 
-// SAVE SESSION
+// SAVE SESSION (SAFE VERSION)
 function saveSession() {
   if (!sessionStartTime) return;
 
@@ -106,9 +106,9 @@ function saveSession() {
 
   const sessionData = {
     date: new Date().toLocaleString(),
-    slouches: slouchCount,
-    slouchTime: totalSlouchTime,
-    score: score,
+    slouches: slouchCount || 0,
+    slouchTime: totalSlouchTime || 0,
+    score: score || 100,
     duration: sessionDuration
   };
 
