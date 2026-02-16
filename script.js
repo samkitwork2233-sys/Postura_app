@@ -11,11 +11,10 @@ let sessionStartTime = 0;
 
 // BUTTON EVENTS
 document.getElementById("connectBtn").addEventListener("click", connectBLE);
-document.getElementById("resetBtn").addEventListener("click", handleResetAndSave);
+document.getElementById("resetBtn").addEventListener("click", resetData);
+document.getElementById("endSessionBtn").addEventListener("click", endSession);
 document.getElementById("slider").addEventListener("input", handleSlider);
 document.getElementById("clearHistoryBtn").addEventListener("click", clearHistory);
-
-window.addEventListener("beforeunload", saveSession);
 
 // CONNECT BLE
 async function connectBLE() {
@@ -24,8 +23,6 @@ async function connectBLE() {
       acceptAllDevices: true,
       optionalServices: [SERVICE_UUID]
     });
-
-    device.addEventListener("gattserverdisconnected", handleDisconnect);
 
     const server = await device.gatt.connect();
     const service = await server.getPrimaryService(SERVICE_UUID);
@@ -36,7 +33,7 @@ async function connectBLE() {
 
     document.getElementById("status").innerText = "Connected";
 
-    // Start new session
+    // Start session
     slouchCount = 0;
     totalSlouchTime = 0;
     score = 100;
@@ -48,20 +45,12 @@ async function connectBLE() {
   }
 }
 
-// HANDLE DISCONNECT
-function handleDisconnect() {
-  document.getElementById("status").innerText = "Disconnected";
-  saveSession();
-  characteristic = null;
-}
-
 // HANDLE DATA
 function handleData(event) {
   const value = new TextDecoder().decode(event.target.value);
   const parts = value.split(",");
 
   if (parts.length >= 5) {
-
     const angle = parseFloat(parts[0]);
     slouchCount = Number(parts[1]) || 0;
     totalSlouchTime = Number(parts[2]) || 0;
@@ -76,10 +65,39 @@ function handleData(event) {
   }
 }
 
-// RESET BUTTON (SAVE THEN RESET)
-function handleResetAndSave() {
-  saveSession();
+// END SESSION (MANUAL SAVE)
+function endSession() {
 
+  if (!sessionStartTime) return;
+
+  const duration = Math.floor((Date.now() - sessionStartTime) / 1000);
+
+  if (duration < 3) {
+    alert("Session too short");
+    return;
+  }
+
+  const sessionData = {
+    date: new Date().toLocaleString(),
+    slouches: slouchCount,
+    slouchTime: totalSlouchTime,
+    score: score,
+    duration: duration
+  };
+
+  let history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
+  history.push(sessionData);
+  localStorage.setItem("posturaHistory", JSON.stringify(history));
+
+  loadHistory();
+
+  alert("Session Saved!");
+
+  sessionStartTime = Date.now();
+}
+
+// RESET
+function resetData() {
   slouchCount = 0;
   totalSlouchTime = 0;
   score = 100;
@@ -108,29 +126,6 @@ function handleSlider(event) {
       new TextEncoder().encode("TH:" + value)
     );
   }
-}
-
-// SAVE SESSION
-function saveSession() {
-  if (!sessionStartTime) return;
-
-  const sessionDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
-
-  if (sessionDuration < 3) return; // ignore very short sessions
-
-  const sessionData = {
-    date: new Date().toLocaleString(),
-    slouches: slouchCount || 0,
-    slouchTime: totalSlouchTime || 0,
-    score: score || 100,
-    duration: sessionDuration
-  };
-
-  let history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
-  history.push(sessionData);
-  localStorage.setItem("posturaHistory", JSON.stringify(history));
-
-  loadHistory();
 }
 
 // LOAD HISTORY
