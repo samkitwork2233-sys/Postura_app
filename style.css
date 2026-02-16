@@ -2,96 +2,80 @@ body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
   background: linear-gradient(135deg, #1e3c72, #2a5298);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-
-.container {
-  background: white;
-  padding: 30px;
-  width: 95%;
-  max-width: 800px;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  color: white;
   text-align: center;
 }
 
+.container {
+  padding: 20px;
+}
+
 h1 {
-  margin-bottom: 5px;
   font-size: 32px;
-  color: #1e3c72;
+  margin-bottom: 5px;
 }
 
 #status {
-  font-weight: bold;
   margin-bottom: 15px;
+  font-weight: bold;
 }
 
 button {
   padding: 10px 20px;
-  margin: 10px;
-  border: none;
   border-radius: 8px;
-  background: #1e3c72;
-  color: white;
+  border: none;
+  background: #00c6ff;
+  color: black;
   font-weight: bold;
   cursor: pointer;
-  transition: 0.3s;
+  margin: 10px;
+  transition: 0.2s;
 }
 
-button:hover {
-  background: #16325c;
+button:active {
+  transform: scale(0.95);
 }
 
 .cards {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   gap: 15px;
-  margin-top: 20px;
   flex-wrap: wrap;
+  margin-top: 15px;
 }
 
 .card {
-  flex: 1;
-  min-width: 150px;
-  background: #f4f6f9;
+  background: rgba(255,255,255,0.15);
   padding: 15px;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  width: 150px;
+  backdrop-filter: blur(10px);
 }
 
 .scoreContainer {
-  margin-top: 30px;
-}
-
-.circle {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  border: 12px solid green;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 42px;
-  font-weight: bold;
-  margin: auto;
-  transition: 0.5s ease;
-}
-
-#postureText {
-  font-weight: bold;
-  margin-top: 10px;
-  font-size: 18px;
-}
-
-.sliderContainer {
   margin-top: 25px;
 }
 
-input[type="range"] {
-  width: 80%;
+.circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 8px solid #00ffcc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  font-size: 32px;
+  font-weight: bold;
+  background: rgba(255,255,255,0.1);
+}
+
+.sliderContainer {
+  margin-top: 20px;
+}
+
+input[type=range] {
+  width: 200px;
 }
 
 
