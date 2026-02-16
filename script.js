@@ -131,7 +131,8 @@ function loadHistory() {
         <b>${item.date}</b><br>
         Slouches: ${item.slouches}<br>
         Slouch Time: ${formatTime(item.slouchTime)}<br>
-        Score: ${item.score}%
+        Score: ${item.score}%<br>
+        Duration: ${formatTime(item.duration)}
       </div>
     `;
   });
