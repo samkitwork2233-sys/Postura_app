@@ -11,12 +11,13 @@ let sessionInterval;
 
 let chart;
 
-// ================= BLE CONNECT =================
+// ================= CONNECT =================
 async function connectBLE() {
     try {
         device = await navigator.bluetooth.requestDevice({
-            acceptAllDevices: true,
-            optionalServices: ['12345678-1234-1234-1234-1234567890ab']
+            filters: [
+                { services: ['12345678-1234-1234-1234-1234567890ab'] }
+            ]
         });
 
         const server = await device.gatt.connect();
@@ -27,6 +28,7 @@ async function connectBLE() {
         characteristic.addEventListener('characteristicvaluechanged', handleData);
 
         document.getElementById("status").innerText = "Connected";
+        document.getElementById("deviceName").innerText = device.name || "POSTURA";
 
         startSession();
 
@@ -35,20 +37,24 @@ async function connectBLE() {
     }
 }
 
-// ================= BLE DISCONNECT =================
+// ================= DISCONNECT =================
 function disconnectBLE() {
     if (device && device.gatt.connected) {
         device.gatt.disconnect();
         document.getElementById("status").innerText = "Disconnected";
+        document.getElementById("deviceName").innerText = "-";
         endSession();
     }
 }
 
-// ================= HANDLE BLE DATA =================
+// ================= HANDLE DATA =================
 function handleData(event) {
 
     const value = new TextDecoder().decode(event.target.value);
     const parts = value.split(",");
+
+    // Format from ESP32:
+    // angle,slouchCount,totalSlouchTime,status,score
 
     if (parts.length >= 5) {
 
@@ -68,7 +74,7 @@ function handleData(event) {
     }
 }
 
-// ================= SESSION TIMER =================
+// ================= SESSION =================
 function startSession() {
     sessionStartTime = Date.now();
     sessionInterval = setInterval(() => {
@@ -79,9 +85,7 @@ function startSession() {
 
 function endSession() {
     clearInterval(sessionInterval);
-
     if (sessionDuration < 5) return;
-
     saveSessionData();
     loadHistory();
     updateChart();
@@ -134,9 +138,7 @@ function updateChart() {
     const labels = history.map(item => item.date);
     const scores = history.map(item => item.postureScore);
 
-    if (chart) {
-        chart.destroy();
-    }
+    if (chart) chart.destroy();
 
     const ctx = document.getElementById('postureChart').getContext('2d');
 
