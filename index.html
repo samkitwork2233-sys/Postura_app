@@ -4,7 +4,7 @@
     <title>POSTURA Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Chart.js CDN -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -12,10 +12,6 @@
             font-family: Arial, sans-serif;
             background: #f4f6f9;
             text-align: center;
-        }
-
-        h2 {
-            margin-top: 20px;
         }
 
         .card {
@@ -42,17 +38,13 @@
             background: #0056b3;
         }
 
-        #historyContainer {
-            text-align: left;
-            font-size: 14px;
-        }
-
         .history-item {
             margin-bottom: 10px;
             padding: 10px;
             border-radius: 8px;
             background: #fafafa;
             border: 1px solid #ddd;
+            text-align: left;
         }
     </style>
 </head>
@@ -63,6 +55,7 @@
 
 <div class="card">
     <p><b>Status:</b> <span id="status">Disconnected</span></p>
+    <p><b>Device:</b> <span id="deviceName">-</span></p>
     <button onclick="connectBLE()">Connect</button>
     <button onclick="disconnectBLE()">Disconnect</button>
 </div>
@@ -90,5 +83,3 @@
 
 </body>
 </html>
-
-
