@@ -1,66 +1,89 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>POSTURA – Smart Posture Monitor</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./style.css">
-</head>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: white;
+  text-align: center;
+}
 
-<body>
+.container {
+  padding: 20px;
+}
 
-<div class="container">
+h1 {
+  font-size: 32px;
+}
 
-  <h1>POSTURA</h1>
-  <p id="status">Disconnected</p>
+button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #00c6ff;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 10px;
+  transition: 0.2s;
+}
 
-  <button id="connectBtn">Connect Device</button>
+button:active {
+  transform: scale(0.95);
+}
 
-  <div class="cards">
+.cards {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
 
-    <div class="card">
-      <h3>Current Angle</h3>
-      <p id="angle">0°</p>
-    </div>
+.card {
+  background: rgba(255,255,255,0.15);
+  padding: 15px;
+  border-radius: 12px;
+  width: 150px;
+}
 
-    <div class="card">
-      <h3>Slouch Count</h3>
-      <p id="slouchCount">0</p>
-    </div>
+.scoreContainer {
+  margin-top: 25px;
+}
 
-    <div class="card">
-      <h3>Total Slouch Time</h3>
-      <p id="slouchTime">00:00</p>
-    </div>
+.circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 8px solid #00ffcc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  font-size: 32px;
+  font-weight: bold;
+}
 
-  </div>
+.sliderContainer {
+  margin-top: 20px;
+}
 
-  <div class="scoreContainer">
-    <div class="circle">
-      <span id="score">100</span>
-    </div>
-    <p id="postureText">Excellent Posture</p>
-  </div>
+input[type=range] {
+  width: 200px;
+}
 
-  <button id="resetBtn">Reset Data</button>
-  <button id="endSessionBtn">End Session</button>
+.historyContainer {
+  margin-top: 30px;
+}
 
-  <div class="sliderContainer">
-    <label>
-      Sensitivity: <span id="sliderValue">10</span>°
-    </label>
-    <br>
-    <input type="range" id="slider" min="5" max="25" value="10">
-  </div>
+#historyList {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
 
-  <div class="historyContainer">
-    <h3>Session History</h3>
-    <div id="historyList"></div>
-    <button id="clearHistoryBtn">Clear History</button>
-  </div>
-
-</div>
-
-<script src="./script.js"></script>
-</body>
-</html>
+.historyItem {
+  background: rgba(255,255,255,0.15);
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+}
