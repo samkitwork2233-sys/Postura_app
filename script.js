@@ -7,11 +7,13 @@ const CHARACTERISTIC_UUID = "abcdefab-1234-1234-1234-abcdefabcdef";
 let slouchCount = 0;
 let totalSlouchTime = 0;
 let score = 100;
+let sessionStartTime = 0;
 
 // BUTTON EVENTS
 document.getElementById("connectBtn").addEventListener("click", connectBLE);
 document.getElementById("resetBtn").addEventListener("click", resetData);
 document.getElementById("slider").addEventListener("input", handleSlider);
+document.getElementById("clearHistoryBtn").addEventListener("click", clearHistory);
 
 // CONNECT BLE
 async function connectBLE() {
@@ -31,6 +33,7 @@ async function connectBLE() {
     characteristic.addEventListener("characteristicvaluechanged", handleData);
 
     document.getElementById("status").innerText = "Connected";
+    sessionStartTime = Date.now();
 
   } catch (error) {
     console.error(error);
@@ -38,9 +41,10 @@ async function connectBLE() {
   }
 }
 
-// HANDLE DISCONNECT
+// DISCONNECT HANDLER
 function onDisconnected() {
   document.getElementById("status").innerText = "Disconnected";
+  saveSession();
   characteristic = null;
 }
 
@@ -94,6 +98,51 @@ function handleSlider(event) {
   }
 }
 
+// SAVE SESSION
+function saveSession() {
+  if (!sessionStartTime) return;
+
+  const sessionDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
+
+  const sessionData = {
+    date: new Date().toLocaleString(),
+    slouches: slouchCount,
+    slouchTime: totalSlouchTime,
+    score: score,
+    duration: sessionDuration
+  };
+
+  let history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
+  history.push(sessionData);
+  localStorage.setItem("posturaHistory", JSON.stringify(history));
+
+  loadHistory();
+}
+
+// LOAD HISTORY
+function loadHistory() {
+  const history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
+  const container = document.getElementById("historyList");
+  container.innerHTML = "";
+
+  history.slice().reverse().forEach(item => {
+    container.innerHTML += `
+      <div class="historyItem">
+        <b>${item.date}</b><br>
+        Slouches: ${item.slouches}<br>
+        Slouch Time: ${formatTime(item.slouchTime)}<br>
+        Score: ${item.score}%
+      </div>
+    `;
+  });
+}
+
+// CLEAR HISTORY
+function clearHistory() {
+  localStorage.removeItem("posturaHistory");
+  loadHistory();
+}
+
 // POSTURE TEXT
 function updatePostureText(score) {
   const text = document.getElementById("postureText");
@@ -114,10 +163,8 @@ function updatePostureText(score) {
 function formatTime(seconds) {
   let mins = Math.floor(seconds / 60);
   let secs = seconds % 60;
-
-  return (
-    String(mins).padStart(2, "0") +
-    ":" +
-    String(secs).padStart(2, "0")
-  );
+  return String(mins).padStart(2,"0") + ":" + String(secs).padStart(2,"0");
 }
+
+// LOAD HISTORY ON PAGE LOAD
+window.onload = loadHistory;
