@@ -1,93 +1,174 @@
-document.addEventListener("DOMContentLoaded", function () {
+let device;
+let characteristic;
 
-let characteristic = null;
-const decoder = new TextDecoder();
-const encoder = new TextEncoder();
+let slouchCount = 0;
+let totalSlouchTime = 0;
+let postureScore = 100;
 
-// CONNECT
-document.getElementById("connectBtn").addEventListener("click", async function () {
+let sessionStartTime = 0;
+let sessionDuration = 0;
+let sessionInterval;
 
-  if (!navigator.bluetooth) {
-    alert("Web Bluetooth not supported.");
-    return;
-  }
+let chart;
 
-  try {
-    const device = await navigator.bluetooth.requestDevice({
-      filters: [{ name: "POSTURA_V3" }],
-      optionalServices: ["12345678-1234-1234-1234-1234567890ab"]
-    });
+// ================= BLE CONNECT =================
+async function connectBLE() {
+    try {
+        device = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: ['12345678-1234-1234-1234-1234567890ab']
+        });
 
-    const server = await device.gatt.connect();
-    const service = await server.getPrimaryService("12345678-1234-1234-1234-1234567890ab");
-    characteristic = await service.getCharacteristic("abcdefab-1234-1234-1234-abcdefabcdef");
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService('12345678-1234-1234-1234-1234567890ab');
+        characteristic = await service.getCharacteristic('abcdefab-1234-1234-1234-abcdefabcdef');
 
-    await characteristic.startNotifications();
+        await characteristic.startNotifications();
+        characteristic.addEventListener('characteristicvaluechanged', handleData);
 
-    document.getElementById("status").innerText = "Connected";
+        document.getElementById("status").innerText = "Connected";
 
-    characteristic.addEventListener("characteristicvaluechanged", handleData);
+        startSession();
 
-  } catch (error) {
-    console.error(error);
-  }
-});
+    } catch (error) {
+        alert("Connection Failed");
+    }
+}
 
-// HANDLE DATA
+// ================= BLE DISCONNECT =================
+function disconnectBLE() {
+    if (device && device.gatt.connected) {
+        device.gatt.disconnect();
+        document.getElementById("status").innerText = "Disconnected";
+        endSession();
+    }
+}
+
+// ================= HANDLE BLE DATA =================
 function handleData(event) {
-  const value = decoder.decode(event.target.value);
-  const parts = value.split(",");
 
-  document.getElementById("angle").innerText = parseFloat(parts[0]).toFixed(2) + "°";
-  document.getElementById("slouchCount").innerText = parts[1];
-  document.getElementById("slouchTime").innerText = formatTime(parseInt(parts[2]));
-  document.getElementById("score").innerText = parts[4];
+    const value = new TextDecoder().decode(event.target.value);
+    const parts = value.split(",");
 
-  updateUI(parts[3]);
+    if (parts.length >= 5) {
+
+        const angle = parseFloat(parts[0]);
+        slouchCount = parseInt(parts[1]);
+        totalSlouchTime = parseInt(parts[2]);
+        const status = parts[3];
+        postureScore = parseInt(parts[4]);
+
+        document.getElementById("angle").innerText = angle;
+        document.getElementById("slouchCount").innerText = slouchCount;
+        document.getElementById("slouchTime").innerText = totalSlouchTime;
+        document.getElementById("postureScore").innerText = postureScore;
+
+        document.getElementById("angle").style.color =
+            status === "GOOD" ? "green" : "red";
+    }
 }
 
-function formatTime(seconds) {
-  const min = Math.floor(seconds / 60);
-  const sec = seconds % 60;
-  return String(min).padStart(2, '0') + ":" + String(sec).padStart(2, '0');
+// ================= SESSION TIMER =================
+function startSession() {
+    sessionStartTime = Date.now();
+    sessionInterval = setInterval(() => {
+        sessionDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
+        document.getElementById("sessionDuration").innerText = sessionDuration;
+    }, 1000);
 }
 
-function updateUI(status) {
-  const circle = document.querySelector(".circle");
+function endSession() {
+    clearInterval(sessionInterval);
 
-  if (status === "GOOD") {
-    circle.style.borderColor = "green";
-    document.getElementById("postureText").innerText = "Excellent Posture";
-  } else {
-    circle.style.borderColor = "red";
-    document.getElementById("postureText").innerText = "Bad Posture";
-  }
+    if (sessionDuration < 5) return;
+
+    saveSessionData();
+    loadHistory();
+    updateChart();
 }
 
-// RESET
-document.getElementById("resetBtn").addEventListener("click", async function () {
-  if (!characteristic) {
-    alert("Device not connected.");
-    return;
-  }
-  await characteristic.writeValue(encoder.encode("RESET"));
-});
+// ================= DATA LOGGING =================
+function saveSessionData() {
 
-// SLIDER (REAL CONTROL)
-document.getElementById("slider").addEventListener("input", async function () {
-  const value = this.value;
-  document.getElementById("sliderValue").innerText = value;
+    const today = new Date().toLocaleDateString();
 
-  if (characteristic) {
-    await characteristic.writeValue(
-      encoder.encode("TH:" + value)
-    );
-  }
-});
+    const sessionData = {
+        date: today,
+        slouchCount: slouchCount,
+        slouchTime: totalSlouchTime,
+        postureScore: postureScore,
+        duration: sessionDuration
+    };
 
-// SERVICE WORKER
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./service-worker.js');
+    let history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
+    history.push(sessionData);
+
+    localStorage.setItem("posturaHistory", JSON.stringify(history));
 }
 
-});
+function loadHistory() {
+
+    const history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
+    const container = document.getElementById("historyContainer");
+
+    container.innerHTML = "";
+
+    history.forEach(record => {
+        container.innerHTML += `
+            <div class="history-item">
+                <b>Date:</b> ${record.date}<br>
+                Slouches: ${record.slouchCount}<br>
+                Slouch Time: ${record.slouchTime} sec<br>
+                Duration: ${record.duration} sec<br>
+                Score: ${record.postureScore}% 
+            </div>
+        `;
+    });
+}
+
+// ================= CHART =================
+function updateChart() {
+
+    const history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
+
+    const labels = history.map(item => item.date);
+    const scores = history.map(item => item.postureScore);
+
+    if (chart) {
+        chart.destroy();
+    }
+
+    const ctx = document.getElementById('postureChart').getContext('2d');
+
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Posture Score (%)',
+                data: scores,
+                borderWidth: 2,
+                tension: 0.3
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    min: 0,
+                    max: 100
+                }
+            }
+        }
+    });
+}
+
+function clearHistory() {
+    localStorage.removeItem("posturaHistory");
+    loadHistory();
+    updateChart();
+}
+
+window.onload = function () {
+    loadHistory();
+    updateChart();
+};
