@@ -7,10 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1e3c72">
 
-  <!-- PWA -->
-  <link rel="manifest" href="./manifest.json">
-
-  <!-- CSS -->
   <link rel="stylesheet" href="./style.css">
 </head>
 
@@ -59,10 +55,14 @@
     <input type="range" id="slider" min="5" max="25" value="10">
   </div>
 
+  <div class="historyContainer">
+    <h3>Session History</h3>
+    <div id="historyList"></div>
+    <button id="clearHistoryBtn">Clear History</button>
+  </div>
+
 </div>
 
 <script src="./script.js"></script>
 </body>
 </html>
-
-
