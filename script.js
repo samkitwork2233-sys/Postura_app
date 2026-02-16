@@ -11,9 +11,11 @@ let sessionStartTime = 0;
 
 // BUTTON EVENTS
 document.getElementById("connectBtn").addEventListener("click", connectBLE);
-document.getElementById("resetBtn").addEventListener("click", resetData);
+document.getElementById("resetBtn").addEventListener("click", handleResetAndSave);
 document.getElementById("slider").addEventListener("input", handleSlider);
 document.getElementById("clearHistoryBtn").addEventListener("click", clearHistory);
+
+window.addEventListener("beforeunload", saveSession);
 
 // CONNECT BLE
 async function connectBLE() {
@@ -23,7 +25,7 @@ async function connectBLE() {
       optionalServices: [SERVICE_UUID]
     });
 
-    device.addEventListener("gattserverdisconnected", onDisconnected);
+    device.addEventListener("gattserverdisconnected", handleDisconnect);
 
     const server = await device.gatt.connect();
     const service = await server.getPrimaryService(SERVICE_UUID);
@@ -34,7 +36,7 @@ async function connectBLE() {
 
     document.getElementById("status").innerText = "Connected";
 
-    // Reset values at start of session
+    // Start new session
     slouchCount = 0;
     totalSlouchTime = 0;
     score = 100;
@@ -46,8 +48,8 @@ async function connectBLE() {
   }
 }
 
-// DISCONNECT HANDLER
-function onDisconnected() {
+// HANDLE DISCONNECT
+function handleDisconnect() {
   document.getElementById("status").innerText = "Disconnected";
   saveSession();
   characteristic = null;
@@ -74,8 +76,10 @@ function handleData(event) {
   }
 }
 
-// RESET
-function resetData() {
+// RESET BUTTON (SAVE THEN RESET)
+function handleResetAndSave() {
+  saveSession();
+
   slouchCount = 0;
   totalSlouchTime = 0;
   score = 100;
@@ -90,6 +94,8 @@ function resetData() {
       new TextEncoder().encode("RESET")
     );
   }
+
+  sessionStartTime = Date.now();
 }
 
 // SLIDER
@@ -104,18 +110,20 @@ function handleSlider(event) {
   }
 }
 
-// SAVE SESSION (STRICT SAFE VERSION)
+// SAVE SESSION
 function saveSession() {
   if (!sessionStartTime) return;
 
   const sessionDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
 
+  if (sessionDuration < 3) return; // ignore very short sessions
+
   const sessionData = {
     date: new Date().toLocaleString(),
-    slouches: Number(slouchCount) || 0,
-    slouchTime: Number(totalSlouchTime) || 0,
-    score: Number(score) || 100,
-    duration: Number(sessionDuration) || 0
+    slouches: slouchCount || 0,
+    slouchTime: totalSlouchTime || 0,
+    score: score || 100,
+    duration: sessionDuration
   };
 
   let history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
@@ -132,19 +140,13 @@ function loadHistory() {
   container.innerHTML = "";
 
   history.slice().reverse().forEach(item => {
-
-    const sl = Number(item.slouches) || 0;
-    const st = Number(item.slouchTime) || 0;
-    const sc = Number(item.score) || 100;
-    const du = Number(item.duration) || 0;
-
     container.innerHTML += `
       <div class="historyItem">
         <b>${item.date}</b><br>
-        Slouches: ${sl}<br>
-        Slouch Time: ${formatTime(st)}<br>
-        Score: ${sc}%<br>
-        Duration: ${formatTime(du)}
+        Slouches: ${item.slouches}<br>
+        Slouch Time: ${formatTime(item.slouchTime)}<br>
+        Score: ${item.score}%<br>
+        Duration: ${formatTime(item.duration)}
       </div>
     `;
   });
