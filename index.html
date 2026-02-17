@@ -1,314 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POSTURA – Smart Posture Monitor</title>
+  <meta charset="UTF-8">
+  <title>POSTURA – Smart Posture Monitor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  color: white;
-  text-align: center;
-}
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-.container {
-  padding: 20px;
-}
-
-h1 {
-  font-size: 32px;
-}
-
-button {
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: none;
-  background: #00c6ff;
-  color: black;
-  font-weight: bold;
-  cursor: pointer;
-  margin: 10px;
-  transition: 0.2s;
-}
-
-button:active {
-  transform: scale(0.95);
-}
-
-.cards {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  flex-wrap: wrap;
-  margin-top: 15px;
-}
-
-.card {
-  background: rgba(255,255,255,0.15);
-  padding: 15px;
-  border-radius: 12px;
-  width: 150px;
-}
-
-.scoreContainer {
-  margin-top: 25px;
-}
-
-.circle {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  border: 8px solid #00ffcc;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: auto;
-  font-size: 32px;
-  font-weight: bold;
-}
-
-.sliderContainer {
-  margin-top: 20px;
-}
-
-input[type=range] {
-  width: 200px;
-}
-
-.historyContainer {
-  margin-top: 30px;
-}
-
-#historyList {
-  max-height: 200px;
-  overflow-y: auto;
-  margin-top: 10px;
-}
-
-.historyItem {
-  background: rgba(255,255,255,0.15);
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  font-size: 14px;
-}
-</style>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div class="container">
 
-<h1>POSTURA</h1>
-<p id="status">Disconnected</p>
+  <h1>POSTURA</h1>
+  <p id="status">Disconnected</p>
 
-<button id="connectBtn">Connect Device</button>
+  <button id="connectBtn">Connect Device</button>
+  <button id="resetBtn">Reset Session</button>
 
-<div class="cards">
-  <div class="card">
-    <h3>Current Angle</h3>
-    <p id="angle">0°</p>
+  <div class="cards">
+
+    <div class="card">
+      <h3>Current Angle</h3>
+      <p id="angle">0°</p>
+    </div>
+
+    <div class="card">
+      <h3>Slouch Count</h3>
+      <p id="slouchCount">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Total Slouch Time</h3>
+      <p id="slouchTime">0 sec</p>
+    </div>
+
   </div>
 
-  <div class="card">
-    <h3>Slouch Count</h3>
-    <p id="slouchCount">0</p>
+  <div class="graph-section">
+    <h3>Posture Angle Graph</h3>
+    <canvas id="angleChart"></canvas>
   </div>
 
-  <div class="card">
-    <h3>Total Slouch Time</h3>
-    <p id="slouchTime">00:00</p>
-  </div>
 </div>
 
-<div class="scoreContainer">
-  <div class="circle">
-    <span id="score">100</span>
-  </div>
-  <p id="postureText">Excellent Posture</p>
-</div>
-
-<button id="resetBtn">Reset Data</button>
-<button id="endSessionBtn">End Session</button>
-
-<div class="sliderContainer">
-  <label>
-    Sensitivity: <span id="sliderValue">10</span>°
-  </label>
-  <br>
-  <input type="range" id="slider" min="5" max="25" value="10">
-</div>
-
-<div class="historyContainer">
-  <h3>Session History</h3>
-  <div id="historyList"></div>
-  <button id="clearHistoryBtn">Clear History</button>
-</div>
-
-</div>
-
-<script>
-let device = null;
-let characteristic = null;
-
-const SERVICE_UUID = "12345678-1234-1234-1234-1234567890ab";
-const CHARACTERISTIC_UUID = "abcdefab-1234-1234-1234-abcdefabcdef";
-
-let slouchCount = 0;
-let totalSlouchTime = 0;
-let score = 100;
-let sessionStartTime = 0;
-
-document.getElementById("connectBtn").addEventListener("click", connectBLE);
-document.getElementById("resetBtn").addEventListener("click", resetData);
-document.getElementById("endSessionBtn").addEventListener("click", endSession);
-document.getElementById("slider").addEventListener("input", handleSlider);
-document.getElementById("clearHistoryBtn").addEventListener("click", clearHistory);
-
-async function connectBLE() {
-  try {
-    device = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
-      optionalServices: [SERVICE_UUID]
-    });
-
-    const server = await device.gatt.connect();
-    const service = await server.getPrimaryService(SERVICE_UUID);
-    characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
-
-    await characteristic.startNotifications();
-    characteristic.addEventListener("characteristicvaluechanged", handleData);
-
-    document.getElementById("status").innerText = "Connected";
-
-    slouchCount = 0;
-    totalSlouchTime = 0;
-    score = 100;
-    sessionStartTime = Date.now();
-
-  } catch (error) {
-    alert("Bluetooth connection failed");
-  }
-}
-
-function handleData(event) {
-  const value = new TextDecoder().decode(event.target.value);
-  const parts = value.split(",");
-
-  if (parts.length >= 5) {
-    const angle = parseFloat(parts[0]);
-    slouchCount = Number(parts[1]) || 0;
-    totalSlouchTime = Number(parts[2]) || 0;
-    score = Number(parts[4]) || 100;
-
-    document.getElementById("angle").innerText = angle.toFixed(1) + "°";
-    document.getElementById("slouchCount").innerText = slouchCount;
-    document.getElementById("slouchTime").innerText = formatTime(totalSlouchTime);
-    document.getElementById("score").innerText = score;
-
-    updatePostureText(score);
-  }
-}
-
-function endSession() {
-  if (!sessionStartTime) return;
-
-  const duration = Math.floor((Date.now() - sessionStartTime) / 1000);
-
-  const sessionData = {
-    date: new Date().toLocaleString(),
-    slouches: slouchCount,
-    slouchTime: totalSlouchTime,
-    score: score,
-    duration: duration
-  };
-
-  let history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
-  history.push(sessionData);
-  localStorage.setItem("posturaHistory", JSON.stringify(history));
-
-  loadHistory();
-  alert("Session Saved!");
-  sessionStartTime = Date.now();
-}
-
-function resetData() {
-  slouchCount = 0;
-  totalSlouchTime = 0;
-  score = 100;
-
-  document.getElementById("slouchCount").innerText = "0";
-  document.getElementById("slouchTime").innerText = "00:00";
-  document.getElementById("score").innerText = "100";
-  document.getElementById("postureText").innerText = "Excellent Posture";
-
-  if (characteristic) {
-    characteristic.writeValueWithoutResponse(
-      new TextEncoder().encode("RESET")
-    );
-  }
-}
-
-function handleSlider(event) {
-  const value = event.target.value;
-  document.getElementById("sliderValue").innerText = value;
-
-  if (characteristic) {
-    characteristic.writeValueWithoutResponse(
-      new TextEncoder().encode("TH:" + value)
-    );
-  }
-}
-
-function loadHistory() {
-  const history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
-  const container = document.getElementById("historyList");
-  container.innerHTML = "";
-
-  history.slice().reverse().forEach(item => {
-    container.innerHTML += `
-      <div class="historyItem">
-        <b>${item.date}</b><br>
-        Slouches: ${item.slouches}<br>
-        Slouch Time: ${formatTime(item.slouchTime)}<br>
-        Score: ${item.score}%<br>
-        Duration: ${formatTime(item.duration)}
-      </div>
-    `;
-  });
-}
-
-function clearHistory() {
-  localStorage.removeItem("posturaHistory");
-  loadHistory();
-}
-
-function updatePostureText(score) {
-  const text = document.getElementById("postureText");
-
-  if (score > 85) {
-    text.innerText = "Excellent Posture";
-    text.style.color = "#00ffcc";
-  } else if (score > 60) {
-    text.innerText = "Good Posture";
-    text.style.color = "yellow";
-  } else {
-    text.innerText = "Improve Your Posture";
-    text.style.color = "red";
-  }
-}
-
-function formatTime(seconds) {
-  let mins = Math.floor(seconds / 60);
-  let secs = seconds % 60;
-  return String(mins).padStart(2,"0") + ":" + String(secs).padStart(2,"0");
-}
-
-window.onload = loadHistory;
-</script>
+<script src="app.js"></script>
 
 </body>
 </html>
