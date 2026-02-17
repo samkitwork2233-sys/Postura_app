@@ -1,9 +1,10 @@
 body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: Arial, sans-serif;
   background: linear-gradient(135deg, #1e3c72, #2a5298);
-  color: white;
+  margin: 0;
+  padding: 0;
   text-align: center;
+  color: white;
 }
 
 .container {
@@ -11,79 +12,40 @@ body {
 }
 
 h1 {
-  font-size: 32px;
+  margin-bottom: 5px;
 }
 
 button {
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: none;
-  background: #00c6ff;
-  color: black;
-  font-weight: bold;
-  cursor: pointer;
+  padding: 10px 15px;
   margin: 10px;
-  transition: 0.2s;
-}
-
-button:active {
-  transform: scale(0.95);
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  background: white;
+  color: #1e3c72;
+  font-weight: bold;
 }
 
 .cards {
   display: flex;
   justify-content: center;
-  gap: 15px;
   flex-wrap: wrap;
-  margin-top: 15px;
+  margin-top: 20px;
 }
 
 .card {
   background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(5px);
   padding: 15px;
+  margin: 10px;
   border-radius: 12px;
   width: 150px;
 }
 
-.scoreContainer {
-  margin-top: 25px;
-}
-
-.circle {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  border: 8px solid #00ffcc;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: auto;
-  font-size: 32px;
-  font-weight: bold;
-}
-
-.sliderContainer {
-  margin-top: 20px;
-}
-
-input[type=range] {
-  width: 200px;
-}
-
-.historyContainer {
+.graph-section {
   margin-top: 30px;
-}
-
-#historyList {
-  max-height: 200px;
-  overflow-y: auto;
-  margin-top: 10px;
-}
-
-.historyItem {
   background: rgba(255,255,255,0.15);
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  font-size: 14px;
+  padding: 20px;
+  border-radius: 15px;
 }
