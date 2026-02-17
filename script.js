@@ -15,7 +15,7 @@ const postureStatusEl = document.getElementById("postureStatus");
 const statusEl = document.getElementById("status");
 const historyEl = document.getElementById("history");
 
-// GRAPH INIT
+// ===== INIT GRAPH =====
 function initChart() {
   const ctx = document.getElementById("chart").getContext("2d");
   chart = new Chart(ctx, {
@@ -25,7 +25,7 @@ function initChart() {
       datasets: [{
         data: [],
         borderColor: "#00ffc3",
-        borderWidth: 3,
+        borderWidth: 2,
         tension: 0.3
       }]
     },
@@ -40,11 +40,12 @@ function initChart() {
 }
 initChart();
 
-// CONNECT
+// ===== CONNECT =====
 document.getElementById("connectBtn").addEventListener("click", async () => {
 
   const device = await navigator.bluetooth.requestDevice({
-    filters: [{ services: [SERVICE_UUID] }]
+    acceptAllDevices: true,
+    optionalServices: [SERVICE_UUID]
   });
 
   const server = await device.gatt.connect();
@@ -55,11 +56,10 @@ document.getElementById("connectBtn").addEventListener("click", async () => {
   characteristic.addEventListener("characteristicvaluechanged", handleData);
 
   statusEl.textContent = "Connected";
-  statusEl.classList.remove("disconnected");
-  statusEl.classList.add("connected");
+  statusEl.className = "connected";
 });
 
-// HANDLE DATA
+// ===== HANDLE DATA =====
 function handleData(event) {
 
   const raw = new TextDecoder().decode(event.target.value);
@@ -84,18 +84,20 @@ function handleData(event) {
   updateGraph(angle);
 }
 
-// GRAPH UPDATE
+// ===== GRAPH UPDATE =====
 function updateGraph(angle) {
+
   if (chart.data.labels.length > 60) {
     chart.data.labels.shift();
     chart.data.datasets[0].data.shift();
   }
+
   chart.data.labels.push(graphIndex++);
   chart.data.datasets[0].data.push(angle);
   chart.update();
 }
 
-// RESET
+// ===== RESET =====
 document.getElementById("resetBtn").addEventListener("click", () => {
   if (characteristic) {
     const encoder = new TextEncoder();
@@ -103,9 +105,9 @@ document.getElementById("resetBtn").addEventListener("click", () => {
   }
 });
 
-// SENSITIVITY
-const slider = document.getElementById("slider");
-slider.addEventListener("input", function () {
+// ===== SENSITIVITY =====
+document.getElementById("slider").addEventListener("input", function () {
+
   document.getElementById("sensitivityValue").textContent = this.value;
 
   if (characteristic) {
@@ -114,8 +116,9 @@ slider.addEventListener("input", function () {
   }
 });
 
-// HISTORY
+// ===== HISTORY =====
 document.getElementById("endSession").addEventListener("click", () => {
+
   const duration = Math.floor((Date.now() - sessionStart) / 1000);
 
   const session = {
@@ -127,6 +130,7 @@ document.getElementById("endSession").addEventListener("click", () => {
   let history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
   history.unshift(session);
   localStorage.setItem("posturaHistory", JSON.stringify(history));
+
   loadHistory();
 });
 
@@ -152,6 +156,7 @@ function loadHistory() {
 
 loadHistory();
 
+// ===== UTIL =====
 function formatTime(seconds) {
   let m = Math.floor(seconds / 60);
   let s = seconds % 60;
