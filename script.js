@@ -1,44 +1,65 @@
-// ================= UUIDs =================
 const SERVICE_UUID = "12345678-1234-1234-1234-1234567890ab";
 const CHARACTERISTIC_UUID = "abcdefab-1234-1234-1234-abcdefabcdef";
 
-// ================= Variables =================
-let device, characteristic;
-let postureChart;
+let characteristic;
+let chart;
 let graphIndex = 0;
 let sessionStart = Date.now();
 let currentScore = 100;
 
-// ================= UI Elements =================
 const angleEl = document.getElementById("angle");
 const slouchCountEl = document.getElementById("slouchCount");
 const slouchTimeEl = document.getElementById("slouchTime");
 const scoreEl = document.getElementById("score");
-const postureLabel = document.getElementById("postureLabel");
+const postureStatusEl = document.getElementById("postureStatus");
 const statusEl = document.getElementById("status");
 const historyEl = document.getElementById("history");
 
-// ================= BLE CONNECT =================
+// GRAPH INIT
+function initChart() {
+  const ctx = document.getElementById("chart").getContext("2d");
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [{
+        data: [],
+        borderColor: "#00ffc3",
+        borderWidth: 3,
+        tension: 0.3
+      }]
+    },
+    options: {
+      animation: false,
+      scales: {
+        x: { display: false },
+        y: { min: -60, max: 60 }
+      }
+    }
+  });
+}
+initChart();
+
+// CONNECT
 document.getElementById("connectBtn").addEventListener("click", async () => {
-  try {
-    device = await navigator.bluetooth.requestDevice({
-      filters: [{ services: [SERVICE_UUID] }]
-    });
 
-    const server = await device.gatt.connect();
-    const service = await server.getPrimaryService(SERVICE_UUID);
-    characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+  const device = await navigator.bluetooth.requestDevice({
+    filters: [{ services: [SERVICE_UUID] }]
+  });
 
-    await characteristic.startNotifications();
-    characteristic.addEventListener("characteristicvaluechanged", handleData);
+  const server = await device.gatt.connect();
+  const service = await server.getPrimaryService(SERVICE_UUID);
+  characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
 
-    statusEl.innerText = "Connected";
-  } catch (error) {
-    alert("Bluetooth connection failed.");
-  }
+  await characteristic.startNotifications();
+  characteristic.addEventListener("characteristicvaluechanged", handleData);
+
+  statusEl.textContent = "Connected";
+  statusEl.classList.remove("disconnected");
+  statusEl.classList.add("connected");
 });
 
-// ================= HANDLE BLE DATA =================
+// HANDLE DATA
 function handleData(event) {
 
   const raw = new TextDecoder().decode(event.target.value);
@@ -52,78 +73,29 @@ function handleData(event) {
   const postureStatus = parts[3];
   const score = parseInt(parts[4]);
 
-  if (isNaN(angle)) return;
-
-  angleEl.innerText = angle.toFixed(2) + "°";
-  slouchCountEl.innerText = slouchCount;
-  slouchTimeEl.innerText = formatTime(slouchTime);
-  scoreEl.innerText = score;
+  angleEl.textContent = angle.toFixed(2) + "°";
+  slouchCountEl.textContent = slouchCount;
+  slouchTimeEl.textContent = formatTime(slouchTime);
+  scoreEl.textContent = score;
+  postureStatusEl.textContent = postureStatus;
 
   currentScore = score;
-
-  // Update label
-  if (postureStatus === "GOOD") {
-    postureLabel.innerText = "Excellent Posture";
-  } else {
-    postureLabel.innerText = "Bad Posture";
-  }
 
   updateGraph(angle);
 }
 
-// ================= GRAPH =================
-function initGraph() {
-  const ctx = document.getElementById("angleChart").getContext("2d");
-
-  postureChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: [],
-      datasets: [{
-        label: "Posture Angle (°)",
-        data: [],
-        borderColor: "#00ffc3",
-        borderWidth: 3,
-        tension: 0.3,
-        fill: false
-      }]
-    },
-    options: {
-      responsive: true,
-      animation: false,
-      scales: {
-        x: { display: false },
-        y: {
-          min: -60,
-          max: 60,
-          ticks: { color: "white" }
-        }
-      },
-      plugins: {
-        legend: {
-          labels: { color: "white" }
-        }
-      }
-    }
-  });
-}
-
+// GRAPH UPDATE
 function updateGraph(angle) {
-  if (!postureChart) return;
-
-  if (postureChart.data.labels.length > 60) {
-    postureChart.data.labels.shift();
-    postureChart.data.datasets[0].data.shift();
+  if (chart.data.labels.length > 60) {
+    chart.data.labels.shift();
+    chart.data.datasets[0].data.shift();
   }
-
-  postureChart.data.labels.push(graphIndex++);
-  postureChart.data.datasets[0].data.push(angle);
-  postureChart.update();
+  chart.data.labels.push(graphIndex++);
+  chart.data.datasets[0].data.push(angle);
+  chart.update();
 }
 
-window.addEventListener("load", initGraph);
-
-// ================= RESET =================
+// RESET
 document.getElementById("resetBtn").addEventListener("click", () => {
   if (characteristic) {
     const encoder = new TextEncoder();
@@ -131,21 +103,19 @@ document.getElementById("resetBtn").addEventListener("click", () => {
   }
 });
 
-// ================= SENSITIVITY =================
-const slider = document.getElementById("sensitivitySlider");
+// SENSITIVITY
+const slider = document.getElementById("slider");
 slider.addEventListener("input", function () {
-  const value = this.value;
-  document.getElementById("sensitivityValue").innerText = value;
+  document.getElementById("sensitivityValue").textContent = this.value;
 
   if (characteristic) {
     const encoder = new TextEncoder();
-    characteristic.writeValue(encoder.encode("TH:" + value));
+    characteristic.writeValue(encoder.encode("TH:" + this.value));
   }
 });
 
-// ================= END SESSION =================
-document.getElementById("endBtn").addEventListener("click", () => {
-
+// HISTORY
+document.getElementById("endSession").addEventListener("click", () => {
   const duration = Math.floor((Date.now() - sessionStart) / 1000);
 
   const session = {
@@ -157,11 +127,9 @@ document.getElementById("endBtn").addEventListener("click", () => {
   let history = JSON.parse(localStorage.getItem("posturaHistory")) || [];
   history.unshift(session);
   localStorage.setItem("posturaHistory", JSON.stringify(history));
-
   loadHistory();
 });
 
-// ================= HISTORY =================
 document.getElementById("clearHistory").addEventListener("click", () => {
   localStorage.removeItem("posturaHistory");
   loadHistory();
@@ -173,7 +141,7 @@ function loadHistory() {
 
   history.forEach(item => {
     historyEl.innerHTML += `
-      <div class="history-card">
+      <div class="card">
         <strong>${item.date}</strong><br>
         Score: ${item.score}%<br>
         Duration: ${item.duration}
@@ -184,7 +152,6 @@ function loadHistory() {
 
 loadHistory();
 
-// ================= UTIL =================
 function formatTime(seconds) {
   let m = Math.floor(seconds / 60);
   let s = seconds % 60;
