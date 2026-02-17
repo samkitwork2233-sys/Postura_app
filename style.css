@@ -1,52 +1,96 @@
 body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
   margin: 0;
-  padding: 0;
-  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #141e30, #243b55);
   color: white;
 }
 
 .container {
-  padding: 20px;
+  padding: 30px;
+  max-width: 1100px;
+  margin: auto;
 }
 
-h1 {
-  margin-bottom: 5px;
+header {
+  text-align: center;
+  margin-bottom: 30px;
 }
 
-button {
-  padding: 10px 15px;
-  margin: 10px;
+.primary-btn {
+  padding: 10px 18px;
+  background: #00ffc3;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
-  background: white;
-  color: #1e3c72;
   font-weight: bold;
+  cursor: pointer;
 }
 
-.cards {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 20px;
+.status {
+  margin: 5px 0;
+}
+
+.disconnected {
+  color: #ff6b6b;
+}
+
+.connected {
+  color: #00ffc3;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
 }
 
 .card {
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(5px);
-  padding: 15px;
-  margin: 10px;
-  border-radius: 12px;
-  width: 160px;
-}
-
-.graph-section {
-  margin-top: 30px;
-  background: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
   padding: 20px;
   border-radius: 15px;
+  text-align: center;
 }
 
+.big {
+  grid-column: span 2;
+}
+
+.score-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 8px solid #00ffc3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 15px auto;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.controls {
+  margin: 30px 0;
+  text-align: center;
+}
+
+.controls input {
+  width: 200px;
+}
+
+.button-group button {
+  margin: 10px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.graph-section, .history-section {
+  margin-top: 40px;
+}
+
+canvas {
+  background: rgba(255,255,255,0.08);
+  border-radius: 15px;
+  padding: 15px;
+}
