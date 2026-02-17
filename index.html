@@ -4,71 +4,71 @@
   <meta charset="UTF-8">
   <title>POSTURA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#1e3c72">
-
-  <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./style.css">
-
-  <!-- Chart.js -->
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
 
-<h1>POSTURA</h1>
-<p id="status">Disconnected</p>
+<div class="container">
 
-<button id="connectBtn">Connect Device</button>
+  <header>
+    <h1>POSTURA</h1>
+    <p id="status" class="status disconnected">Disconnected</p>
+    <button id="connectBtn" class="primary-btn">Connect Device</button>
+  </header>
 
-<div class="cards">
-  <div class="card">
-    <h3>Current Angle</h3>
-    <p id="angle">0°</p>
-  </div>
+  <section class="dashboard">
 
-  <div class="card">
-    <h3>Slouch Count</h3>
-    <p id="slouchCount">0</p>
-  </div>
+    <div class="card big">
+      <h3>Posture Score</h3>
+      <div class="score-circle">
+        <span id="score">100</span>
+      </div>
+      <p id="postureStatus">GOOD</p>
+    </div>
 
-  <div class="card">
-    <h3>Total Slouch Time</h3>
-    <p id="slouchTime">00:00</p>
-  </div>
+    <div class="card">
+      <h3>Current Angle</h3>
+      <p id="angle">0°</p>
+    </div>
+
+    <div class="card">
+      <h3>Slouch Count</h3>
+      <p id="slouchCount">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Slouch Time</h3>
+      <p id="slouchTime">00:00</p>
+    </div>
+
+  </section>
+
+  <section class="controls">
+    <div>
+      Sensitivity: <span id="sensitivityValue">10</span>°
+      <input type="range" id="slider" min="5" max="30" value="10">
+    </div>
+
+    <div class="button-group">
+      <button id="resetBtn">Reset</button>
+      <button id="endSession">End Session</button>
+      <button id="clearHistory">Clear History</button>
+    </div>
+  </section>
+
+  <section class="graph-section">
+    <h2>Live Posture Graph</h2>
+    <canvas id="chart"></canvas>
+  </section>
+
+  <section class="history-section">
+    <h2>Session History</h2>
+    <div id="history"></div>
+  </section>
+
 </div>
-
-<div class="score-container">
-  <div class="circle">
-    <span id="score">100</span>
-  </div>
-  <p id="postureLabel">Excellent Posture</p>
-</div>
-
-<button id="resetBtn">Reset Data</button>
-<button id="endBtn">End Session</button>
-
-<br><br>
-
-Sensitivity: <span id="sensitivityValue">10</span>°
-<br>
-<input type="range" id="sensitivitySlider" min="5" max="30" value="10">
-
-<!-- LIVE GRAPH -->
-<div style="margin:40px;">
-  <h2 style="color:white;">Live Posture Graph</h2>
-  <canvas id="angleChart"
-    style="background:rgba(255,255,255,0.08);
-    border-radius:15px;
-    padding:15px;">
-  </canvas>
-</div>
-
-<h2>Session History</h2>
-<div id="history"></div>
-
-<button id="clearHistory">Clear History</button>
 
 <script src="script.js"></script>
-
 </body>
 </html>
