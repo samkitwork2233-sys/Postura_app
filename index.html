@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
   <title>POSTURA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -11,24 +12,15 @@
 
 <div class="container">
 
-  <header>
-    <h1>POSTURA</h1>
-    <p id="status" class="status disconnected">Disconnected</p>
-    <button id="connectBtn" class="primary-btn">Connect Device</button>
-  </header>
+  <h1>POSTURA</h1>
+  <p id="status" class="disconnected">Disconnected</p>
 
-  <section class="dashboard">
+  <button id="connectBtn">Connect Device</button>
 
-    <div class="card big">
-      <h3>Posture Score</h3>
-      <div class="score-circle">
-        <span id="score">100</span>
-      </div>
-      <p id="postureStatus">GOOD</p>
-    </div>
+  <div class="grid">
 
     <div class="card">
-      <h3>Current Angle</h3>
+      <h3>Angle</h3>
       <p id="angle">0°</p>
     </div>
 
@@ -42,30 +34,30 @@
       <p id="slouchTime">00:00</p>
     </div>
 
-  </section>
-
-  <section class="controls">
-    <div>
-      Sensitivity: <span id="sensitivityValue">10</span>°
-      <input type="range" id="slider" min="5" max="30" value="10">
+    <div class="card scoreCard">
+      <h3>Score</h3>
+      <div class="circle">
+        <span id="score">100</span>
+      </div>
+      <p id="postureStatus">GOOD</p>
     </div>
 
-    <div class="button-group">
-      <button id="resetBtn">Reset</button>
-      <button id="endSession">End Session</button>
-      <button id="clearHistory">Clear History</button>
-    </div>
-  </section>
+  </div>
 
-  <section class="graph-section">
-    <h2>Live Posture Graph</h2>
-    <canvas id="chart"></canvas>
-  </section>
+  <div class="controls">
+    Sensitivity: <span id="sensitivityValue">10</span>°
+    <input type="range" id="slider" min="5" max="30" value="10">
+    <br><br>
+    <button id="resetBtn">Reset</button>
+    <button id="endSession">End Session</button>
+    <button id="clearHistory">Clear History</button>
+  </div>
 
-  <section class="history-section">
-    <h2>Session History</h2>
-    <div id="history"></div>
-  </section>
+  <h2>Live Graph</h2>
+  <canvas id="chart"></canvas>
+
+  <h2>Session History</h2>
+  <div id="history"></div>
 
 </div>
 
